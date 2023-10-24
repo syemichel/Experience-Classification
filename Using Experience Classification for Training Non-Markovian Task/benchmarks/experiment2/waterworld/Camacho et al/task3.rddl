@@ -1,0 +1,183 @@
+domain waterworld {
+	requirements = {
+    	concurrent,           // this domain permits multiple non-default actions
+        continuous,           // this domain uses real-valued parameterized variables
+        cpf-deterministic,    // this domain uses deterministic conditional functions for transitions
+        intermediate-nodes,   // this domain uses intermediate pvariable nodes
+        reward-deterministic  // this domain does not use a stochastic reward
+    };
+    types {
+    ball: object; //b1, b2, b3...
+    dim : object; //x, y
+    };
+    pvariables {
+    	//field setting
+    	MIN-ACTION-BOUND: { non-fluent, real, default = -3.5 };
+        MAX-ACTION-BOUND: { non-fluent, real, default =  3.5 };
+        MIN-VELO-BOUND: { non-fluent, real, default = -3.5 };
+        MAX-VELO-BOUND: {non-fluent, real, default = 3.5};
+        MAX-FIELD-WIDTH: {non-fluent, real, default = 25};
+       //ball setting
+        BALL-RADIUS: {non-fluent, real, default= 0.5};
+        RED(ball) : { non-fluent, bool, default = false };
+        GREEN(ball) : { non-fluent, bool, default = false };
+        BLUE(ball) : { non-fluent, bool, default = false };
+        BLACK(ball) : { non-fluent, bool, default = false };
+        WHITE(ball) : { non-fluent, bool, default = false };
+        GREY(ball) : { non-fluent, bool, default = false };
+        ba-velo(ball, dim): {state-fluent, real, default = 0.0};
+        ba-loc(ball, dim): {state-fluent, real, default = 0.0};
+        if-crash(ball, dim): { interm-fluent, real};
+        ba-ag-crash(ball): { interm-fluent, bool};
+
+       //agent setting
+        ag-loc(dim): { state-fluent, real, default = 0.0 };
+        ag-velo(dim): { state-fluent, real, default = 0.0 };
+        ag-move(dim): { action-fluent, real, default = 0.0 };
+        if-ag-crash(dim): { interm-fluent, real, level = 1};
+        //automata states
+    	p1:  { interm-fluent, bool };
+        p2:  { interm-fluent, bool };
+        p3:  { interm-fluent, bool };
+        p4:  { interm-fluent, bool };
+        p5:  { interm-fluent, bool };
+        p6:  { interm-fluent, bool };
+q1: { state-fluent, bool, default = ture};
+q2: { state-fluent, bool, default = false};
+q3: { state-fluent, bool, default = false};
+q4: { state-fluent, bool, default = false};
+q5: { state-fluent, bool, default = false};
+q6: { state-fluent, bool, default = false};
+q7: { state-fluent, bool, default = false};
+q8: { state-fluent, bool, default = false};
+q9: { state-fluent, bool, default = false};
+q10: { state-fluent, bool, default = false};
+q11: { state-fluent, bool, default = false};
+q12: { state-fluent, bool, default = false};
+q13: { state-fluent, bool, default = false};
+q14: { state-fluent, bool, default = false};
+q15: { state-fluent, bool, default = false};
+q16: { state-fluent, bool, default = false};
+q17: { state-fluent, bool, default = false};
+
+
+
+    };
+    cpfs{
+    	//ball-move
+
+    	if-crash(?b, ?d) = if(ba-loc(?b, ?d) + ba-velo(?b, ?d) >= MAX-FIELD-WIDTH)
+    						then 1
+    						else [
+    							if(ba-loc(?b, ?d) + ba-velo(?b, ?d) <= 0)
+    							then 2
+    							else 0
+    						];
+
+    	ba-loc'(?b, ?d) = if(if-crash(?b, ?d)==0)
+    						then ba-loc(?b, ?d) + ba-velo(?b, ?d)
+    						else[
+    							if(if-crash(?b, ?d)==1)
+    							then MAX-FIELD-WIDTH
+    							else 0
+    						];
+
+    	ba-velo'(?b, ?d) = if(if-crash(?b, ?d)~=0)
+    						then -ba-velo(?b, ?d)
+    						else ba-velo(?b, ?d);
+
+    	ba-ag-crash(?b) = if(forall_{?d:dim}((ba-loc(?b, ?d) - ag-loc(?d) <= BALL-RADIUS * 2) ^ (ba-loc(?b, ?d) - ag-loc(?d) >= -BALL-RADIUS*2) ))
+    				then true
+    				else false;
+
+
+    	//agent move
+    	if-ag-crash(?d) = if(ag-loc(?d) + ag-velo(?d) >= MAX-FIELD-WIDTH)
+    						then 1
+    						else [
+    							if(ag-loc(?d) + ag-velo(?d) <= 0)
+    							then 2
+    							else 0
+    						];
+
+    	ag-loc'(?d) = if(if-ag-crash(?d)==0)
+    						then ag-loc(?d) + ag-velo(?d)
+    						else[
+    							if(if-ag-crash(?d)==1)
+    							then MAX-FIELD-WIDTH
+    							else 0
+    						];
+
+    	ag-velo'(?d) = if(if-ag-crash(?d)~=0)
+    						then -ag-velo(?d)
+    						else ag-move(?d);
+
+    //event setting
+	p1 =
+		if(exists_{?b:ball}(RED(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p2 =
+	    if(exists_{?b:ball}(GREEN(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p3 = if(exists_{?b:ball}(BLUE(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+    p4 =
+		if(exists_{?b:ball}(BLACK(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p5 =
+	    if(exists_{?b:ball}(WHITE(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p6 = if(exists_{?b:ball}(GREY(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+    // DFA translation
+q1'= q1^~p1^~p2^~p3^~p4^~p5^~p6;
+q2'=(q1^((p2^~p1)|(p3^~p1)|(p5^~p4)|(p6^~p4))) | (q2^true) | (q3^((p2^~p1)|(p3^~p1)|(p4^~p5)|(p6^~p5))) | (q4^((p1^~p2)|(p3^~p2)|(p5^~p4)|(p6^~p4))) | (q5^((p1^~p2)|(p3^~p2)|(p4^~p5)|(p6^~p5)))
+|(q6^ ((p2^~p1)|(p3^~p1)|(p4^~p6)|(p5^~p6))) | (q7^((p1^~p2)|(p3^~p2)|(p4^~p6)|(p5^~p6))) | (q8^((p1^~p3)|(p2^~p3)|(p5^~p4)|(p6^~p4))) | (q9^((p1^~p3)|(p2^~p3)|(p4^~p5)|(p6^~p5))) | (q10^((p1^~p3)|(p2^~p3)|(p4^~p6)|(p5^~p6))) | (q11^(~p1^(p2|p3)))
+|(q12^(~p2^(p1|p3)))|(q13^~p3^(p1|p2))|(q14^~p4^(p5|p6))|(q15^~p5^(p4|p6))|(q16^~p6^(p4|p5));
+q3'=(q1^p4^~p1^~p2^~p3)|(q3^~p1^~p2^~p3^~p4^~p5^~p6);
+q4'=(q1^p1^~p4^~p5^~p6)|(q4^~p1^~p2^~p3^~p4^~p5^~p6);
+q5'=(q1^p1^p4)|(q3^p1^~p4^~p5^~p6)|(q4^p4^~p1^~p2^~p3)|(q5^~p1^~p2^~p3^~p4^~p5^~p6);
+q6'=(q3^p5^~p1^~p2^~p3)|(q6^~p1^~p2^~p3^~p4^~p5^~p6);
+q7'=(q3^p1^p5)|(q5^p5^~p1^~p2^~p3)|(q6^p1^~p4^~p5^~p6)|(q7^~p1^~p2^~p3^~p4^~p5^~p6);
+q8'=(q4^p2^~p4^~p5^~p6)|(q8^~p1^~p2^~p3^~p4^~p5^~p6);
+q9'=(q4^p2^p4)|(q5^p2^~p4^~p5^~p6)|(q8^p4^~p1^~p2^~p3)|(q9^~p1^~p2^~p3^~p4^~p5^~p6);
+q10'=(q5^p2^p5)|(q7^p2^~p4^~p5^~p6)|(q9^p5^~p1^~p2^~p3)|(q10^~p1^~p2^~p3^~p4^~p5^~p6);
+q11'=(q6^p6^~p1^~p2^~p3)|(q11^~p1^~p2^~p3);
+q12'=(q6^p1^p6)|(q7^p6^~p1^~p2^~p3)|(q11^p1)|(q12^~p1^~p2^~p3);
+q13'=(q7^p2^p6)|(q10^p6^~p1^~p2^~p3)|(q12^p2)|(q13^~p1^~p2^~p3);
+q14'=(q8^p3^~p4^~p5^~p6)|(q14^~p4^~p5^~p6);
+q15'=(q8^p3^p4)|(q9^p3^~p4^~p5^~p6)|(q14^p4)|(q15^~p4^~p5^~p6);
+q16'=(q9^p3^p5)|(q10^p3^~p4^~p5^~p6)|(q15^p5)|(q16^~p4^~p5^~p6);
+q17'=(q10^p3^p6)|(q13^p3)|(q16^p6)|(q17^true);
+
+    };
+
+    reward =  100*q17;
+    action-preconditions {
+    	forall_{?d:dim} [ag-move(?d) >= MIN-ACTION-BOUND];
+        forall_{?d:dim} [ag-move(?d) <= MAX-ACTION-BOUND];
+
+    };
+
+    termination{
+    q2;
+    q17;
+    };
+
+}
+
+
+
+

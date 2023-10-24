@@ -1,0 +1,55 @@
+non-fluents waterworld-nf {
+    domain = waterworld;
+
+    objects {
+        ball: {b1, b2, b3, b4, b5, b6};
+        dim: {x, y};
+    };
+
+    non-fluents {
+        MAX-FIELD-WIDTH = 10.0;
+        RED(b1);
+    	RED(b2);
+    	GREEN(b3);
+    	GREEN(b4);
+    	BLUE(b5);
+    	BLUE(b6);
+
+    };
+}
+
+instance inst1 {
+    domain = waterworld;
+    non-fluents = waterworld-nf;
+
+    init-state {
+ba-loc(b1, x) = 3.0055997987660668;
+ba-loc(b1, y) = 0.8765811525632481;
+ba-loc(b2, x) = 8.809494151913347;
+ba-loc(b2, y) = 7.7912917135946635;
+ba-loc(b3, x) = 7.4327496817109555;
+ba-loc(b3, y) = 2.5473554830384604;
+ba-loc(b4, x) = 3.1205161779721777;
+ba-loc(b4, y) = 6.9412307716009485;
+ba-loc(b5, x) = 3.730333080359592;
+ba-loc(b5, y) = 9.42222798437192;
+ba-velo(b1, x) = 1.8478379569055203;
+ba-velo(b1, y) = -1.8104450607670994;
+ba-velo(b2, x) = 1.69493691665838;
+ba-velo(b2, y) = -1.3631532591263393;
+ba-velo(b3, x) = 0.12392220130255316;
+ba-velo(b3, y) = 0.2206392531345358;
+ba-velo(b4, x) = 0.26704710026280876;
+ba-velo(b4, y) = 1.8283465979319604;
+ba-velo(b5, x) = -1.2625228808154485;
+ba-velo(b5, y) = -0.951960174718891;
+
+
+    ag-loc(x) = 5;
+    ag-loc(y) = 5;
+    };
+
+    max-nondef-actions = 2;
+    horizon = 100;
+    discount = 1.0;
+}
