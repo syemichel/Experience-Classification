@@ -14,41 +14,23 @@ Install all toolkits in your environment.
 run train.py for training models using EC, the running example is as follows：
 ```python
 from PRG_SB3 import *
-from stable_baselines3.common.evaluation import evaluate_policy
-from Experience_classify import *
-import argparse
 from pyRDDLGym import RDDLEnv
-from sb3_contrib import *
-from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
-from Experience_classify2 import *
-from stable_baselines3.common.callbacks import EvalCallback
-import time
+from EC import SAC_EC
+from stable_baselines3.common.logger import configure
+import sys
+sys.setrecursionlimit(1000000)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-n', type=int, default=200000, help='train num')
-    parser.add_argument('-r', type=str, default='waterworld3', help='rddl name')
-    parser.add_argument('-i', type=str, default='inst11', help='inst name')
-    parser.add_argument('-l', type=str, default='waterworld2_2', help='inst name')
-    args = parser.parse_args()
+    domain = "benchmarks/waterworld3/waterworld3.rddl" # path for domain
+    instance = "benchmarks/waterworld3/inst21.rddl" # path for instance
+    log_path = "progress.csv" # path for log
 
-    rddl_name = args.r
-    inst_name = args.i
-    total_train = args.n
-    l = args.l
-    log_inter = 100
-    env = RDDLEnv.RDDLEnv(domain=('benchmarks/' + rddl_name + '/' + l + '.rddl'),
-                          instance=('benchmarks/' + rddl_name + '/' + inst_name + '.rddl'))
-
+    env = RDDLEnv.RDDLEnv(domain=domain, instance=instance)
     env = FlattenAction(env)
-    n_actions = env.action_space.shape[-1]
-    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-
-    model = SAC("MultiInputPolicy", env, verbose=1,  learning_starts=1000,
-                learning_rate=3e-4, batch_size=64, tensorboard_log='log', train_freq=1,)
-    model.learn(total_timesteps=total_train, log_interval=log_inter, tb_log_name='TD3_' + l, )
-
-    model.save("model/racecar")
-    log = evaluate_policy(model, env, n_eval_episodes=30, deterministic=True)
-    print(log)
+    model = SAC_EC("MultiInputPolicy", env, verbose=1, learning_starts=1000,
+                        learning_rate=3e-4, batch_size=256, train_freq=1, device='cpu')  
+    # SAC_EC can be changed by other algorithms in EC/RS/PER/MOD 
+    new_logger = configure(log_path, ["csv"])
+    model.set_logger(new_logger)
+    model.learn(total_timesteps=500000, log_interval=100) # set training steps and log interval
 ```
