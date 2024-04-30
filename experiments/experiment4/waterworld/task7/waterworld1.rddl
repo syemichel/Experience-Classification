@@ -1,0 +1,411 @@
+domain waterworld {
+	requirements = {
+    	concurrent,           // this domain permits multiple non-default actions
+        continuous,           // this domain uses real-valued parameterized variables
+        cpf-deterministic,    // this domain uses deterministic conditional functions for transitions
+        intermediate-nodes,   // this domain uses intermediate pvariable nodes
+        reward-deterministic  // this domain does not use a stochastic reward
+    };
+    types {
+    ball: object; //b1, b2, b3...
+    dim : object; //x, y
+    state: {@q1, @q2, @q3, @q4, @q5, @q6, @q7, @q8, @q9, @q10, @q11, @q12, @q13, @q14, @q15, @q16, @q17, @q18, @q19, @q20,
+    @q21, @q22, @q23, @q24, @q25, @q26, @q27, @q28, @q29, @q30, @q31, @q32, @q33, @q34, @q35, @q36, @q37, @q38, @q39, @q40,
+    @q41, @q42, @q43, @q44, @q45, @q46, @q47, @q48, @q49, @q50, @q51, @q52, @q53, @q54, @q55, @q56, @q57, @q58, @q59, @q60,
+     @q61, @q62, @q63, @q64, @q65, @q66
+};
+     state1: {@1, @2, @3, @4, @5, @6, @7, @8, @9, @10, @11};
+    };
+    pvariables {
+    	//field setting
+    	MIN-ACTION-BOUND: { non-fluent, real, default = -3.5 };
+        MAX-ACTION-BOUND: { non-fluent, real, default =  3.5 };
+        MIN-VELO-BOUND: { non-fluent, real, default = -3.5 };
+        MAX-VELO-BOUND: {non-fluent, real, default = 3.5};
+        MAX-FIELD-WIDTH: {non-fluent, real, default = 25};
+       //ball setting
+        BALL-RADIUS: {non-fluent, real, default= 0.5};
+        R1(ball) : { non-fluent, bool, default = false };
+        R2(ball) : { non-fluent, bool, default = false };
+        R3(ball) : { non-fluent, bool, default = false };
+        R4(ball) : { non-fluent, bool, default = false };
+        R5(ball) : { non-fluent, bool, default = false };
+        R6(ball) : { non-fluent, bool, default = false };
+        R7(ball) : { non-fluent, bool, default = false };
+        R8(ball) : { non-fluent, bool, default = false };
+        ba-velo(ball, dim): {state-fluent, real, default = 0.0};
+        ba-loc(ball, dim): {state-fluent, real, default = 0.0};
+        if-crash(ball, dim): { interm-fluent, real};
+        ba-ag-crash(ball): { interm-fluent, bool};
+
+       //agent setting
+        ag-loc(dim): { state-fluent, real, default = 0.0 };
+        ag-velo(dim): { state-fluent, real, default = 0.0 };
+        ag-move(dim): { action-fluent, real, default = 0.0 };
+        if-ag-crash(dim): { interm-fluent, real, level = 1};
+        //automata states
+    	p1:  { interm-fluent, bool };
+        p2:  { interm-fluent, bool };
+        p3:  { interm-fluent, bool };
+        p4:  { interm-fluent, bool };
+        p5:  { interm-fluent, bool };
+        p6:  { interm-fluent, bool };
+        p7:  { interm-fluent, bool };
+        p8:  { interm-fluent, bool };
+    	as : {state-fluent, state1, default = @1};
+    	ds : {interm-fluent, state};
+    	pds : {state-fluent, state, default = @q1};
+
+
+    };
+    cpfs{
+    	//ball-move
+
+    	if-crash(?b, ?d) = if(ba-loc(?b, ?d) + ba-velo(?b, ?d) >= MAX-FIELD-WIDTH)
+    						then 1
+    						else [
+    							if(ba-loc(?b, ?d) + ba-velo(?b, ?d) <= 0)
+    							then 2
+    							else 0
+    						];
+
+    	ba-loc'(?b, ?d) = if(if-crash(?b, ?d)==0)
+    						then ba-loc(?b, ?d) + ba-velo(?b, ?d)
+    						else[
+    							if(if-crash(?b, ?d)==1)
+    							then MAX-FIELD-WIDTH
+    							else 0
+    						];
+
+    	ba-velo'(?b, ?d) = if(if-crash(?b, ?d)~=0)
+    						then -ba-velo(?b, ?d)
+    						else ba-velo(?b, ?d);
+
+    	ba-ag-crash(?b) = if(forall_{?d:dim}((ba-loc(?b, ?d) - ag-loc(?d) <= BALL-RADIUS * 2) ^ (ba-loc(?b, ?d) - ag-loc(?d) >= -BALL-RADIUS*2) ))
+    				then true
+    				else false;
+
+
+    	//agent move
+    	if-ag-crash(?d) = if(ag-loc(?d) + ag-velo(?d) >= MAX-FIELD-WIDTH)
+    						then 1
+    						else [
+    							if(ag-loc(?d) + ag-velo(?d) <= 0)
+    							then 2
+    							else 0
+    						];
+
+    	ag-loc'(?d) = if(if-ag-crash(?d)==0)
+    						then ag-loc(?d) + ag-velo(?d)
+    						else[
+    							if(if-ag-crash(?d)==1)
+    							then MAX-FIELD-WIDTH
+    							else 0
+    						];
+
+    	ag-velo'(?d) = if(if-ag-crash(?d)~=0)
+    						then -ag-velo(?d)
+    						else ag-move(?d);
+
+    //event setting
+	p1 =
+		if(exists_{?b:ball}(R1(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p2 =
+	    if(exists_{?b:ball}(R2(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p3 = if(exists_{?b:ball}(R3(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+    p4 =
+		if(exists_{?b:ball}(R4(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p5 =
+	    if(exists_{?b:ball}(R5(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p6 = if(exists_{?b:ball}(R6(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p7 = if(exists_{?b:ball}(R7(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+	p8 = if(exists_{?b:ball}(R8(?b) ^ ba-ag-crash(?b)))
+		then true
+		else false;
+
+
+    // DFA translation
+    ds =
+    if(pds==@q1 ^ (~p1 & ~p8)) then @q1
+else if(pds==@q1 ^ (p8 & ~p1)) then @q2
+else if(pds==@q1 ^ (p1 & ~p8)) then @q3
+else if(pds==@q1 ^ (p1 & p8)) then @q4
+else if(pds==@q2 ^ (~p1 & ~p7)) then @q2
+else if(pds==@q2 ^ (p7 & ~p1)) then @q5
+else if(pds==@q2 ^ (p1 & ~p7)) then @q4
+else if(pds==@q2 ^ (p1 & p7)) then @q6
+else if(pds==@q3 ^ (~p2 & ~p8)) then @q3
+else if(pds==@q3 ^ (p8 & ~p2)) then @q4
+else if(pds==@q3 ^ (p2 & ~p8)) then @q7
+else if(pds==@q3 ^ (p2 & p8)) then @q8
+else if(pds==@q4 ^ (~p2 & ~p7)) then @q4
+else if(pds==@q4 ^ (p7 & ~p2)) then @q6
+else if(pds==@q4 ^ (p2 & ~p7)) then @q8
+else if(pds==@q4 ^ (p2 & p7)) then @q9
+else if(pds==@q5 ^ (~p1 & ~p6)) then @q5
+else if(pds==@q5 ^ (p6 & ~p1)) then @q10
+else if(pds==@q5 ^ (p1 & ~p6)) then @q6
+else if(pds==@q5 ^ (p1 & p6)) then @q11
+else if(pds==@q6 ^ (~p2 & ~p6)) then @q6
+else if(pds==@q6 ^ (p6 & ~p2)) then @q11
+else if(pds==@q6 ^ (p2 & ~p6)) then @q9
+else if(pds==@q6 ^ (p2 & p6)) then @q12
+else if(pds==@q7 ^ (~p3 & ~p8)) then @q7
+else if(pds==@q7 ^ (p8 & ~p3)) then @q8
+else if(pds==@q7 ^ (p3 & ~p8)) then @q13
+else if(pds==@q7 ^ (p3 & p8)) then @q14
+else if(pds==@q8 ^ (~p3 & ~p7)) then @q8
+else if(pds==@q8 ^ (p7 & ~p3)) then @q9
+else if(pds==@q8 ^ (p3 & ~p7)) then @q14
+else if(pds==@q8 ^ (p3 & p7)) then @q15
+else if(pds==@q9 ^ (~p3 & ~p6)) then @q9
+else if(pds==@q9 ^ (p6 & ~p3)) then @q12
+else if(pds==@q9 ^ (p3 & ~p6)) then @q15
+else if(pds==@q9 ^ (p3 & p6)) then @q16
+else if(pds==@q10 ^ (~p1 & ~p5)) then @q10
+else if(pds==@q10 ^ (p5 & ~p1)) then @q17
+else if(pds==@q10 ^ (p1 & ~p5)) then @q11
+else if(pds==@q10 ^ (p1 & p5)) then @q18
+else if(pds==@q11 ^ (~p2 & ~p5)) then @q11
+else if(pds==@q11 ^ (p5 & ~p2)) then @q18
+else if(pds==@q11 ^ (p2 & ~p5)) then @q12
+else if(pds==@q11 ^ (p2 & p5)) then @q19
+else if(pds==@q12 ^ (~p3 & ~p5)) then @q12
+else if(pds==@q12 ^ (p5 & ~p3)) then @q19
+else if(pds==@q12 ^ (p3 & ~p5)) then @q16
+else if(pds==@q12 ^ (p3 & p5)) then @q20
+else if(pds==@q13 ^ (~p4 & ~p8)) then @q13
+else if(pds==@q13 ^ (p8 & ~p4)) then @q14
+else if(pds==@q13 ^ (p4 & ~p8)) then @q21
+else if(pds==@q13 ^ (p4 & p8)) then @q22
+else if(pds==@q14 ^ (~p4 & ~p7)) then @q14
+else if(pds==@q14 ^ (p7 & ~p4)) then @q15
+else if(pds==@q14 ^ (p4 & ~p7)) then @q22
+else if(pds==@q14 ^ (p4 & p7)) then @q23
+else if(pds==@q15 ^ (~p4 & ~p6)) then @q15
+else if(pds==@q15 ^ (p6 & ~p4)) then @q16
+else if(pds==@q15 ^ (p4 & ~p6)) then @q23
+else if(pds==@q15 ^ (p4 & p6)) then @q24
+else if(pds==@q16 ^ (~p4 & ~p5)) then @q16
+else if(pds==@q16 ^ (p5 & ~p4)) then @q20
+else if(pds==@q16 ^ (p4 & ~p5)) then @q24
+else if(pds==@q16 ^ (p4 & p5)) then @q25
+else if(pds==@q17 ^ (~p1 & ~p4)) then @q17
+else if(pds==@q17 ^ (p4 & ~p1)) then @q26
+else if(pds==@q17 ^ (p1 & ~p4)) then @q18
+else if(pds==@q17 ^ (p1 & p4)) then @q27
+else if(pds==@q18 ^ (~p2 & ~p4)) then @q18
+else if(pds==@q18 ^ (p4 & ~p2)) then @q27
+else if(pds==@q18 ^ (p2 & ~p4)) then @q19
+else if(pds==@q18 ^ (p2 & p4)) then @q28
+else if(pds==@q19 ^ (~p3 & ~p4)) then @q19
+else if(pds==@q19 ^ (p4 & ~p3)) then @q28
+else if(pds==@q19 ^ (p3 & ~p4)) then @q20
+else if(pds==@q19 ^ (p3 & p4)) then @q29
+else if(pds==@q20 ^ (~p4)) then @q20
+else if(pds==@q20 ^ (p4)) then @q30
+else if(pds==@q21 ^ (~p5 & ~p8)) then @q21
+else if(pds==@q21 ^ (p8 & ~p5)) then @q22
+else if(pds==@q21 ^ (p5 & ~p8)) then @q31
+else if(pds==@q21 ^ (p5 & p8)) then @q32
+else if(pds==@q22 ^ (~p5 & ~p7)) then @q22
+else if(pds==@q22 ^ (p7 & ~p5)) then @q23
+else if(pds==@q22 ^ (p5 & ~p7)) then @q32
+else if(pds==@q22 ^ (p5 & p7)) then @q33
+else if(pds==@q23 ^ (~p5 & ~p6)) then @q23
+else if(pds==@q23 ^ (p6 & ~p5)) then @q24
+else if(pds==@q23 ^ (p5 & ~p6)) then @q33
+else if(pds==@q23 ^ (p5 & p6)) then @q34
+else if(pds==@q24 ^ (~p5)) then @q24
+else if(pds==@q24 ^ (p5)) then @q35
+else if(pds==@q25 ^ (~p4 & ~p5)) then @q25
+else if(pds==@q25 ^ (p5 & ~p4)) then @q35
+else if(pds==@q25 ^ (p4 & ~p5)) then @q30
+else if(pds==@q25 ^ (p4 & p5)) then @q36
+else if(pds==@q26 ^ (~p1 & ~p3)) then @q26
+else if(pds==@q26 ^ (p3 & ~p1)) then @q37
+else if(pds==@q26 ^ (p1 & ~p3)) then @q27
+else if(pds==@q26 ^ (p1 & p3)) then @q38
+else if(pds==@q27 ^ (~p2 & ~p3)) then @q27
+else if(pds==@q27 ^ (p3 & ~p2)) then @q38
+else if(pds==@q27 ^ (p2 & ~p3)) then @q28
+else if(pds==@q27 ^ (p2 & p3)) then @q39
+else if(pds==@q28 ^ (~p3)) then @q28
+else if(pds==@q28 ^ (p3)) then @q40
+else if(pds==@q29 ^ (~p3 & ~p4)) then @q29
+else if(pds==@q29 ^ (p4 & ~p3)) then @q30
+else if(pds==@q29 ^ (p3 & ~p4)) then @q40
+else if(pds==@q29 ^ (p3 & p4)) then @q41
+else if(pds==@q30 ^ (~p3 & ~p5)) then @q30
+else if(pds==@q30 ^ (p5 & ~p3)) then @q36
+else if(pds==@q30 ^ (p3 & ~p5)) then @q41
+else if(pds==@q30 ^ (p3 & p5)) then @q42
+else if(pds==@q31 ^ (~p6 & ~p8)) then @q31
+else if(pds==@q31 ^ (p8 & ~p6)) then @q32
+else if(pds==@q31 ^ (p6 & ~p8)) then @q43
+else if(pds==@q31 ^ (p6 & p8)) then @q44
+else if(pds==@q32 ^ (~p6 & ~p7)) then @q32
+else if(pds==@q32 ^ (p7 & ~p6)) then @q33
+else if(pds==@q32 ^ (p6 & ~p7)) then @q44
+else if(pds==@q32 ^ (p6 & p7)) then @q45
+else if(pds==@q33 ^ (~p6)) then @q33
+else if(pds==@q33 ^ (p6)) then @q46
+else if(pds==@q34 ^ (~p5 & ~p6)) then @q34
+else if(pds==@q34 ^ (p6 & ~p5)) then @q46
+else if(pds==@q34 ^ (p5 & ~p6)) then @q35
+else if(pds==@q34 ^ (p5 & p6)) then @q47
+else if(pds==@q35 ^ (~p4 & ~p6)) then @q35
+else if(pds==@q35 ^ (p6 & ~p4)) then @q47
+else if(pds==@q35 ^ (p4 & ~p6)) then @q36
+else if(pds==@q35 ^ (p4 & p6)) then @q48
+else if(pds==@q36 ^ (~p3 & ~p6)) then @q36
+else if(pds==@q36 ^ (p6 & ~p3)) then @q48
+else if(pds==@q36 ^ (p3 & ~p6)) then @q42
+else if(pds==@q36 ^ (p3 & p6)) then @q49
+else if(pds==@q37 ^ (~p1 & ~p2)) then @q37
+else if(pds==@q37 ^ (p2 & ~p1)) then @q50
+else if(pds==@q37 ^ (p1 & ~p2)) then @q38
+else if(pds==@q37 ^ (p1 & p2)) then @q51
+else if(pds==@q38 ^ (~p2)) then @q38
+else if(pds==@q38 ^ (p2)) then @q52
+else if(pds==@q39 ^ (~p2 & ~p3)) then @q39
+else if(pds==@q39 ^ (p3 & ~p2)) then @q40
+else if(pds==@q39 ^ (p2 & ~p3)) then @q52
+else if(pds==@q39 ^ (p2 & p3)) then @q53
+else if(pds==@q40 ^ (~p2 & ~p4)) then @q40
+else if(pds==@q40 ^ (p4 & ~p2)) then @q41
+else if(pds==@q40 ^ (p2 & ~p4)) then @q53
+else if(pds==@q40 ^ (p2 & p4)) then @q54
+else if(pds==@q41 ^ (~p2 & ~p5)) then @q41
+else if(pds==@q41 ^ (p5 & ~p2)) then @q42
+else if(pds==@q41 ^ (p2 & ~p5)) then @q54
+else if(pds==@q41 ^ (p2 & p5)) then @q55
+else if(pds==@q42 ^ (~p2 & ~p6)) then @q42
+else if(pds==@q42 ^ (p6 & ~p2)) then @q49
+else if(pds==@q42 ^ (p2 & ~p6)) then @q55
+else if(pds==@q42 ^ (p2 & p6)) then @q56
+else if(pds==@q43 ^ (~p7 & ~p8)) then @q43
+else if(pds==@q43 ^ (p8 & ~p7)) then @q44
+else if(pds==@q43 ^ (p7 & ~p8)) then @q57
+else if(pds==@q43 ^ (p7 & p8)) then @q58
+else if(pds==@q44 ^ (~p7)) then @q44
+else if(pds==@q44 ^ (p7)) then @q59
+else if(pds==@q45 ^ (~p6 & ~p7)) then @q45
+else if(pds==@q45 ^ (p7 & ~p6)) then @q59
+else if(pds==@q45 ^ (p6 & ~p7)) then @q46
+else if(pds==@q45 ^ (p6 & p7)) then @q60
+else if(pds==@q46 ^ (~p5 & ~p7)) then @q46
+else if(pds==@q46 ^ (p7 & ~p5)) then @q60
+else if(pds==@q46 ^ (p5 & ~p7)) then @q47
+else if(pds==@q46 ^ (p5 & p7)) then @q61
+else if(pds==@q47 ^ (~p4 & ~p7)) then @q47
+else if(pds==@q47 ^ (p7 & ~p4)) then @q61
+else if(pds==@q47 ^ (p4 & ~p7)) then @q48
+else if(pds==@q47 ^ (p4 & p7)) then @q62
+else if(pds==@q48 ^ (~p3 & ~p7)) then @q48
+else if(pds==@q48 ^ (p7 & ~p3)) then @q62
+else if(pds==@q48 ^ (p3 & ~p7)) then @q49
+else if(pds==@q48 ^ (p3 & p7)) then @q63
+else if(pds==@q49 ^ (~p2 & ~p7)) then @q49
+else if(pds==@q49 ^ (p7 & ~p2)) then @q63
+else if(pds==@q49 ^ (p2 & ~p7)) then @q56
+else if(pds==@q49 ^ (p2 & p7)) then @q64
+else if(pds==@q50 ^ (~p1)) then @q50
+else if(pds==@q50 ^ (p1)) then @q65
+else if(pds==@q51 ^ (~p1 & ~p2)) then @q51
+else if(pds==@q51 ^ (p2 & ~p1)) then @q52
+else if(pds==@q51 ^ (p1)) then @q65
+else if(pds==@q52 ^ (~p1 & ~p3)) then @q52
+else if(pds==@q52 ^ (p3 & ~p1)) then @q53
+else if(pds==@q52 ^ (p1)) then @q65
+else if(pds==@q53 ^ (~p1 & ~p4)) then @q53
+else if(pds==@q53 ^ (p4 & ~p1)) then @q54
+else if(pds==@q53 ^ (p1)) then @q65
+else if(pds==@q54 ^ (~p1 & ~p5)) then @q54
+else if(pds==@q54 ^ (p5 & ~p1)) then @q55
+else if(pds==@q54 ^ (p1)) then @q65
+else if(pds==@q55 ^ (~p1 & ~p6)) then @q55
+else if(pds==@q55 ^ (p6 & ~p1)) then @q56
+else if(pds==@q55 ^ (p1)) then @q65
+else if(pds==@q56 ^ (~p1 & ~p7)) then @q56
+else if(pds==@q56 ^ (p7 & ~p1)) then @q64
+else if(pds==@q56 ^ (p1)) then @q65
+else if(pds==@q57 ^ (~p8)) then @q57
+else if(pds==@q57 ^ (p8)) then @q65
+else if(pds==@q58 ^ (~p7 & ~p8)) then @q58
+else if(pds==@q58 ^ (p8)) then @q65
+else if(pds==@q58 ^ (p7 & ~p8)) then @q59
+else if(pds==@q59 ^ (~p6 & ~p8)) then @q59
+else if(pds==@q59 ^ (p8)) then @q65
+else if(pds==@q59 ^ (p6 & ~p8)) then @q60
+else if(pds==@q60 ^ (~p5 & ~p8)) then @q60
+else if(pds==@q60 ^ (p8)) then @q65
+else if(pds==@q60 ^ (p5 & ~p8)) then @q61
+else if(pds==@q61 ^ (~p4 & ~p8)) then @q61
+else if(pds==@q61 ^ (p8)) then @q65
+else if(pds==@q61 ^ (p4 & ~p8)) then @q62
+else if(pds==@q62 ^ (~p3 & ~p8)) then @q62
+else if(pds==@q62 ^ (p8)) then @q65
+else if(pds==@q62 ^ (p3 & ~p8)) then @q63
+else if(pds==@q63 ^ (~p2 & ~p8)) then @q63
+else if(pds==@q63 ^ (p8)) then @q65
+else if(pds==@q63 ^ (p2 & ~p8)) then @q64
+else if(pds==@q64 ^ (~p1 & ~p8)) then @q64
+else if(pds==@q64 ^ (p1 | p8)) then @q65
+else if(pds==@q65 ^ (true)) then @q65
+    else @q66;
+
+    pds' = ds;
+
+    as' =
+     if(ds==@q1) then @1
+else if(ds==@q5 | ds==@q7 | ds==@q4 | ds==@q2 | ds==@q3) then @2
+else if(ds==@q17 | ds==@q21 | ds==@q11 | ds==@q14 | ds==@q9 | ds==@q10 | ds==@q13 | ds==@q6 | ds==@q8) then @3
+else if(ds==@q19 | ds==@q23 | ds==@q16 | ds==@q26 | ds==@q31 | ds==@q18 | ds==@q22 | ds==@q12 | ds==@q15) then @4
+else if(ds==@q37 | ds==@q43 | ds==@q39 | ds==@q45 | ds==@q28 | ds==@q33 | ds==@q29 | ds==@q34 | ds==@q25 | ds==@q20 | ds==@q24 | ds==@q27 | ds==@q32) then @5
+else if(ds==@q52 | ds==@q59 | ds==@q41 | ds==@q47 | ds==@q36 | ds==@q51 | ds==@q58 | ds==@q40 | ds==@q46 | ds==@q38 | ds==@q44 | ds==@q30 | ds==@q35) then @6
+else if(ds==@q55 | ds==@q62 | ds==@q49 | ds==@q54 | ds==@q61 | ds==@q53 | ds==@q60 | ds==@q42 | ds==@q48) then @7
+else if(ds==@q50 | ds==@q57 | ds==@q64 | ds==@q56 | ds==@q63) then @8
+else if(ds==@q65) then @10
+else @11;
+
+    };
+
+    reward =  100*[as == @10];
+
+    action-preconditions {
+    	forall_{?d:dim} [ag-move(?d) >= MIN-ACTION-BOUND];
+        forall_{?d:dim} [ag-move(?d) <= MAX-ACTION-BOUND];
+
+    };
+
+   termination{
+   as == @10;
+  };
+
+}
+
+
+
+
