@@ -1,5 +1,6 @@
 # Experience-Classification
-Experience Classification combining prioritized experience replay with automatic reward shaping achieves successful results in solving non-Markovian tasks.
+Experience Classification combining prioritized experience replay with automatic reward shaping achieves successful results in solving non-Markovian tasks. Our framework is shown as follows:
+![image](https://github.com/syemichel/Experience-Classification/blob/main/framework.png)
 
 ## Installation
 
@@ -11,7 +12,7 @@ pip install stable-baselines3==2.2.1
 Install all toolkits in your environment.
 
 ## Usage
-run train.py in the source code for training models using EC, the running example is as follows：
+run train.py in the source code for training models using EC, the running example is as follows:
 ```python
 from PRG_SB3 import *
 from pyRDDLGym import RDDLEnv
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     model.set_logger(new_logger)
     model.learn(total_timesteps=500000, log_interval=100) # set training steps and log interval
 ```
-run generate_trans.py in the source code for automatically generating dfa informations in rddl, the running example is as follows：
+run generate_trans.py in the source code for automatically generating dfa informations in rddl, the running example is as follows:
 ```python
 from classify import *
 
