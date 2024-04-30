@@ -11,7 +11,7 @@ pip install git+https://github.com/DLR-RM/stable-baselines3
 Install all toolkits in your environment.
 
 ## Usage
-run train.py for training models using EC, the running example is as follows：
+run train.py in the source code for training models using EC, the running example is as follows：
 ```python
 from PRG_SB3 import *
 from pyRDDLGym import RDDLEnv
