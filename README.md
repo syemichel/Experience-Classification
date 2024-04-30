@@ -36,7 +36,6 @@ if __name__ == '__main__':
 ```
 run generate_trans.py in the source code for automatically generating dfa informations in rddl, the running example is as follows：
 ```python
-import re
 from classify import *
 
 # Example usage
