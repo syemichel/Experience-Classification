@@ -1,0 +1,72 @@
+non-fluents waterworld-nf {
+    domain = waterworld;
+
+    objects {
+        ball: {b1, b2, b3, b4, b5, b6, b7, b8, b9};
+        dim: {x, y};
+    };
+
+    non-fluents {
+        MAX-FIELD-WIDTH = 20.0;
+        RED(b1);
+    	RED(b2);
+    	RED(b3);
+    	GREEN(b4);
+    	GREEN(b5);
+    	GREEN(b6);
+        BLUE(b7);
+    	BLUE(b8);
+    	BLUE(b9);
+    };
+}
+
+instance inst1 {
+    domain = waterworld;
+    non-fluents = waterworld-nf;
+
+    init-state {
+ba-loc(b1, x) = 5.24674487287441;
+ba-loc(b1, y) = 3.402459787263374;
+ba-loc(b2, x) = 16.855263091571288;
+ba-loc(b2, y) = 7.949420970180637;
+ba-loc(b3, x) = 2.4697792282879747;
+ba-loc(b3, y) = 5.250105660423483;
+ba-loc(b4, x) = 17.015624310988407;
+ba-loc(b4, y) = 15.845260976590133;
+ba-loc(b5, x) = 0.6864389868963706;
+ba-loc(b5, y) = 18.364605529406226;
+ba-loc(b6, x) = 6.16075279680814;
+ba-loc(b6, y) = 3.943572594455875;
+ba-loc(b7, x) = 12.749114181896335;
+ba-loc(b7, y) = 13.580116047447428;
+ba-loc(b8, x) = 12.860570581810686;
+ba-loc(b8, y) = 8.966525779773523;
+ba-loc(b9, x) = 17.17645954825798;
+ba-loc(b9, y) = 12.798417334264737;
+ba-velo(b1, x) = 0.8915035710615635;
+ba-velo(b1, y) = 1.6570829197981845;
+ba-velo(b2, x) = 1.3065577710421508;
+ba-velo(b2, y) = -1.2683780901844601;
+ba-velo(b3, x) = -1.7403280791337206;
+ba-velo(b3, y) = 1.9305762468675205;
+ba-velo(b4, x) = -1.7645063849276383;
+ba-velo(b4, y) = 0.8586795410295018;
+ba-velo(b5, x) = -1.7211859031809047;
+ba-velo(b5, y) = 1.8706429972661784;
+ba-velo(b6, x) = 0.9501790483123795;
+ba-velo(b6, y) = 1.635018784569314;
+ba-velo(b7, x) = -0.584134285119331;
+ba-velo(b7, y) = -1.315682205254696;
+ba-velo(b8, x) = 1.0987399731155139;
+ba-velo(b8, y) = 0.790646736681025;
+ba-velo(b9, x) = -0.3706853998108779;
+ba-velo(b9, y) = -0.25763516980480183;
+
+    ag-loc(x) = 10;
+    ag-loc(y) = 10;
+    };
+
+    max-nondef-actions = 2;
+    horizon = 100;
+    discount = 1.0;
+}
