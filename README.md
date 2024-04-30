@@ -42,7 +42,7 @@ from classify import *
 # Example usage
 file_path = 'dot.txt'  # write in transition information for dfa in the dot file
 trans_express = 2
-# We achieve two conversion formats, defaulting to the second one, your can use the first on by changing it to 1
+# We achieve two conversion formats, defaulting to the second one, your can use the first one by changing it to 1
 with open(file_path, 'r') as file:
     lines = [line.strip() for line in file]
 classified_result = classify_lines(lines)
