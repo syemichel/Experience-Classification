@@ -1,0 +1,118 @@
+non-fluents waterworld_nf {
+    domain = waterworld;
+
+    objects {
+        ball: {b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18};
+        dim: {x, y};
+    };
+
+    non-fluents {
+        MAX-FIELD-WIDTH = 30.0;
+          RED(b1);
+    	RED(b2);
+    	RED(b3);
+    	GREEN(b4);
+    	GREEN(b5);
+    	GREEN(b6);
+    	BLUE(b7);
+    	BLUE(b8);
+    	BLUE(b9);
+    	BLACK(b10);
+    	BLACK(b11);
+    	BLACK(b12);
+    	WHITE(b13);
+    	WHITE(b14);
+    	WHITE(b15);
+    	GREY(b16);
+    	GREY(b17);
+    	GREY(b18);
+
+    };
+}
+
+instance inst1 {
+    domain = waterworld;
+    non-fluents = waterworld_nf;
+
+    init-state {
+
+ba-loc(b1, x) = 23;
+ba-loc(b1, y) = 2;
+ba-loc(b2, x) = 6;
+ba-loc(b2, y) = 27;
+ba-loc(b3, x) = 20;
+ba-loc(b3, y) = 27;
+ba-loc(b4, x) = 5;
+ba-loc(b4, y) = 6;
+ba-loc(b5, x) = 1;
+ba-loc(b5, y) = 7;
+ba-loc(b6, x) = 28;
+ba-loc(b6, y) = 0;
+ba-loc(b7, x) = 25;
+ba-loc(b7, y) = 27;
+ba-loc(b8, x) = 20;
+ba-loc(b8, y) = 10;
+ba-loc(b9, x) = 3;
+ba-loc(b9, y) = 23;
+ba-loc(b10, x) = 25;
+ba-loc(b10, y) = 26;
+ba-loc(b11, x) = 6;
+ba-loc(b11, y) = 6;
+ba-loc(b12, x) = 8;
+ba-loc(b12, y) = 26;
+ba-loc(b13, x) = 24;
+ba-loc(b13, y) = 28;
+ba-loc(b14, x) = 4;
+ba-loc(b14, y) = 25;
+ba-loc(b15, x) = 6;
+ba-loc(b15, y) = 5;
+ba-loc(b16, x) = 22;
+ba-loc(b16, y) = 6;
+ba-loc(b17, x) = 25;
+ba-loc(b17, y) = 2;
+ba-loc(b18, x) = 7;
+ba-loc(b18, y) = 22;
+ba-velo(b1, x) = 0;
+ba-velo(b1, y) = 0;
+ba-velo(b2, x) = 1;
+ba-velo(b2, y) = 2;
+ba-velo(b3, x) = 1;
+ba-velo(b3, y) = -2;
+ba-velo(b4, x) = 2;
+ba-velo(b4, y) = -1;
+ba-velo(b5, x) = 2;
+ba-velo(b5, y) = -1;
+ba-velo(b6, x) = -1;
+ba-velo(b6, y) = 0;
+ba-velo(b7, x) = 2;
+ba-velo(b7, y) = 0;
+ba-velo(b8, x) = 1;
+ba-velo(b8, y) = 1;
+ba-velo(b9, x) = 0;
+ba-velo(b9, y) = 1;
+ba-velo(b10, x) = 0;
+ba-velo(b10, y) = 0;
+ba-velo(b11, x) = 1;
+ba-velo(b11, y) = 0;
+ba-velo(b12, x) = 2;
+ba-velo(b12, y) = -2;
+ba-velo(b13, x) = -2;
+ba-velo(b13, y) = 0;
+ba-velo(b14, x) = -1;
+ba-velo(b14, y) = 2;
+ba-velo(b15, x) = 2;
+ba-velo(b15, y) = 1;
+ba-velo(b16, x) = 1;
+ba-velo(b16, y) = -2;
+ba-velo(b17, x) = -1;
+ba-velo(b17, y) = -2;
+ba-velo(b18, x) = -1;
+ba-velo(b18, y) = -1;
+    ag-loc(x) = 15;
+    ag-loc(y) = 15;
+    };
+
+    max-nondef-actions = 2;
+    horizon = 200;
+    discount = 1.0;
+}
