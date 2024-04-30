@@ -6,74 +6,10 @@ Experience Classification combining prioritized experience replay with automatic
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
-pip install pyRDDLGym
 pip install git+https://github.com/DLR-RM/stable-baselines3
-pip install gymnasium
 ```
-## Make pyRDDLGym compatible with SB3
-### Change PRG
-in /pyRDDLGym/Core/Env/RDDLEnv.py：
-```bash
-return self.state, 0.0, self.done,self.done, {}# line199
-return obs,reward, self.done, self.done,{}# line251
-return obs, {} # line286
-```
-in /pyRDDLGym/Core/Simulator/RDDLSimulator.py：
-```bash
-def step(self, actions: Args) -> Args: # line 308
-        '''Samples and returns the next state from the CPF expressions.
+Install all toolkits in your environment.
 
-        :param actions: a dict mapping current action fluent to their values
-        '''
-        rddl = self.rddl
-        actions = self._process_actions(actions)
-        subs = self.subs
-        subs.update(actions)
-
-        # evaluate CPFs in topological order
-        for (cpf, expr, dtype) in self.cpfs:
-            sample = self._sample(expr, subs)
-            RDDLSimulator._check_type(sample, dtype, cpf, expr)
-            subs[cpf] = sample
-
-        # evaluate reward
-        #reward = self.sample_reward()
-
-        # update state
-        self.state = {}
-        for (state, next_state) in rddl.next_state.items():
-            subs[state] = subs[next_state]
-            self.state.update(rddl.ground_values(state, subs[state]))
-
-        # update observation
-        if self._pomdp:
-            obs = {}
-            for var in rddl.observ:
-                obs.update(rddl.ground_values(var, subs[var]))
-        else:
-            obs = self.state
-            # evaluate CPFs in topological order
-        for (cpf, expr, dtype) in self.cpfs:
-            sample = self._sample(expr, subs)
-            RDDLSimulator._check_type(sample, dtype, cpf, expr)
-            subs[cpf] = sample
-        reward = self.sample_reward()
-        done = self.check_terminal_states()
-        return obs, reward, done
-```
-in /stable-baselines3/common/vec_env/dummy_vec_env.py
-```bash
-self.buf_obs[key][env_idx] = obs[0][key] #line 116
-```
-in /shimmy/openai_gym_compatibility.py
-```bash
-obs, reward, done, done1, info = self.gym_env.step(action) #line 256
-```
-in gymnasium/core.py
-```bash
-return self.env.reset()
-```
-change "import gym" to "import gymnasium as gym" in the source code of pyRDDLGy
 ## Usage
 run train.py for training models using EC, the running example is as follows：
 ```python
