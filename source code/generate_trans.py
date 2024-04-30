@@ -1,5 +1,5 @@
 import re
-from classify1 import *
+from classify import *
 # Example usage
 file_path = 'dot.txt'  # write in transition information for dfa in the dot file
 trans_express = 2
