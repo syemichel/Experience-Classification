@@ -9,7 +9,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install stableb
 ```bash
 pip install stable-baselines3==2.2.1
 ```
-Install all toolkits in your environment.
+Download and install all toolkits in your environment.
 
 ## Usage
 run train.py in the source code for training models using EC, the running example is as follows:
